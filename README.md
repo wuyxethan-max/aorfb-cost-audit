@@ -2,7 +2,7 @@
 
 > **Interactive Web App:** [Open the Streamlit calculator](https://aorfb-cost-audit.streamlit.app/)
 >
-> **Archival DOI:** `[Paste your Zenodo DOI badge after creating GitHub Release v1.0.0]`
+> **Archival DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24582285.svg)](https://doi.org/10.5281/zenodo.24582285)
 
 An open-source electrochemistry modeling package, reproducible audit notebook, and browser-accessible **Streamlit calculator** that asks a practical question for aqueous organic redox flow battery (AORFB) design: **how much must positive-electrolyte capacity fade improve for substituted hydroquinones to approach inorganic cost benchmarks, and how severely do inconsistent laboratory protocols (PS vs. GS, concentration, polymorph aging) skew system-level rankings?**
 
