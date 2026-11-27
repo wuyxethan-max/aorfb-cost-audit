@@ -1,6 +1,7 @@
 # AORFB Cost & Cycling-Protocol Audit (`aorfb-cost-audit`)
 
-> **Interactive Web App:** `[Paste your Streamlit Community Cloud URL after deployment]`  
+> **Interactive Web App:** [Open the Streamlit calculator](https://aorfb-cost-audit.streamlit.app/)
+>
 > **Archival DOI:** `[Paste your Zenodo DOI badge after creating GitHub Release v1.0.0]`
 
 An open-source electrochemistry modeling package, reproducible audit notebook, and browser-accessible **Streamlit calculator** that asks a practical question for aqueous organic redox flow battery (AORFB) design: **how much must positive-electrolyte capacity fade improve for substituted hydroquinones to approach inorganic cost benchmarks, and how severely do inconsistent laboratory protocols (PS vs. GS, concentration, polymorph aging) skew system-level rankings?**
@@ -11,10 +12,10 @@ This project independently audits the techno-economic model of [Emmel et al. (20
 
 ## Key Chemistry & Audit Findings
 
-- **Ortho-blocking cuts modeled cost by 99.1%, yet still trails inorganic benchmarks by >$10,000/kWh:** Under common phosphate PS conditions (`1.40 V`), `asym-O-5` lowers modeled capital cost from `$1.20M/kWh` (`O-3`) to `$10,735–$10,798/kWh`, but still requires **42–56x** slower fade to match ammonium ferrocyanide (`$651.7/kWh`) and **84–168x** slower fade (`≤ 0.00274–0.00548%/day`) to match Future Case VRFB (`$528.5/kWh`).
-- **Cycling protocol bias alters cost by >$33,000/kWh on the same molecule:** For matched-formulation `asym-O-5` (`0.10 M` in `1 M H2SO4`), substituting galvanostatic (`1.8%/day`) for potentiostatic (`0.46%/day`) fade increases modeled capital cost by **+$33,363/kWh**.
-- **Polymorph solubility loss amplifies replacement cost:** Keeping `O-5` fade fixed while reducing sulfate solubility from fresh (`0.24 M`) to aged polymorph (`0.06 M`) adds **+$50,333/kWh** (PS) or **+$70,950/kWh** (GS).
-- **Published benchmark reconciliation:** Published component sums recover `676.7`, `370.0`, and `3785.5 USD/kWh` for Present Case VRFB, Future Case `1,6-DPAP`, and Future Case `TEMPTMA`. Independent recalculation documents both the `+0.60 V` carbon-HER reference offset in Emmel Fig. 2 and the single-stack vs. full-stack Eq. S40 maintenance diagnostic.
+- **The phosphate comparison shows a 99.1% reduction in modeled cost:** At an assumed `1.40 V`, using phosphate PS fade rates and saturation solubilities gives about `$1.20M/kWh` for `O-3` and `$10,735–$10,798/kWh` for `asym-O-5`. In the separate sulfate PS scenario, `asym-O-5` would need **42–56×** slower fade to match the published ammonium ferrocyanide benchmark (`$651.7/kWh`) and **84–168×** slower fade to match Future Case VRFB (`$528.5/kWh`). The latter requires a maximum of about `0.00274–0.00548%/day` across the two maintenance conventions.
+- **Cycling-rate sensitivity for the same formulation:** Yang et al. measured `0.46%/day` under PS and `1.80%/day` under GS for `0.10 M` `asym-O-5` in `1 M H2SO4`. Substituting the GS fade rate in the `0.44 M` saturation scenario increases modeled cost by **$33,363/kWh**.
+- **Polymorph solubility loss amplifies modeled replacement cost:** Reducing `O-5` sulfate solubility from `0.24 M` to `0.06 M` adds **$50,263–$50,333/kWh** at the fixed PS fade rate and **$70,880–$70,950/kWh** at the fixed GS fade rate across the two maintenance conventions.
+- **Published benchmark reconciliation:** Published components sum to `676.7`, `370.0`, and `3785.5 USD/kWh` for Present Case VRFB, Future Case `1,6-DPAP`, and Future Case `TEMPTMA`, respectively, at one decimal place. Independent totals are `$840.62`, `$459.63`, and `$3826.87/kWh`. The audit also documents the approximate `+0.60 V` reference offset for two points in Emmel Fig. 2 and tests the effect of a single-stack replacement assumption against the system-wide replacement specified in Eq. S40.
 
 ---
 
@@ -74,8 +75,8 @@ aorfb-cost-audit/
 ## Scope & Modeling Caveats
 
 - Scenario calculations assume a 4 h system, neutral-molecule active pricing (`$3.48/kg`), an idealized counter-electrolyte (`100 g/mol`, `1 e-`, `2 M`), and an illustrative WP1 stack count (`430.17–438.64`).
-- Extrapolating dilute symmetric-cell laboratory fade (`0.05–0.10 M`) to saturation solubility and 20-year operation is a scenario sensitivity audit rather than a field lifetime forecast.
-- Voltages above `1.45 V` for acidic hydroquinone posolytes exceed the approximate carbon hydrogen-evolution OCV guide and are marked as exploratory.
+- The model extrapolates linear fade from dilute symmetric cells (`0.05–0.10 M`) to saturation and 20-year operation. Each renewal is charged on the full Eq. 5 cost basis, including tanks, following the printed Eq. S38 expression. These costs quantify sensitivity to scenario assumptions.
+- The `1.45 V` open-circuit guide is an estimate for `asym-O-5` against the pH 0 carbon hydrogen-evolution bound. The app marks discharge voltages above this guide as exploratory.
 
 ---
 
