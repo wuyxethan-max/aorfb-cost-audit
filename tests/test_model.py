@@ -133,7 +133,11 @@ class TestAORFBCostAudit(unittest.TestCase):
         poly_ps = polymorph_sensitivity_summary(
             o5_fresh, aged_solubility_M=0.06, fade_pct_day=0.78, mode="independent"
         )
-        self.assertAlmostEqual(poly_ps["delta_aged_minus_fresh_usd_kWh"], 50333.0, delta=300.0)
+        self.assertAlmostEqual(poly_ps["delta_aged_minus_fresh_usd_kWh"], 50262.96, places=2)
+        variant_poly_ps = polymorph_sensitivity_summary(
+            o5_fresh, aged_solubility_M=0.06, fade_pct_day=0.78, mode="sensitivity_variant"
+        )
+        self.assertAlmostEqual(variant_poly_ps["delta_aged_minus_fresh_usd_kWh"], 50332.63, places=2)
 
 
 if __name__ == "__main__":
