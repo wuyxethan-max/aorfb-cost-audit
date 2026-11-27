@@ -50,6 +50,7 @@ MOLECULE_PRESETS = {
         protocol="Potentiostatic (PS)",
         ps_fade=0.46,
         gs_fade=1.80,
+        comparison_note="Yang Table 1 used 0.10 M asym-O-5 in 1 M H₂SO₄ in both protocols. The model applies those rates at the selected solubility.",
         aged_sol=0.44,
     ),
     "asym-O-5 (1 M H3PO4, PS)": dict(
@@ -62,7 +63,8 @@ MOLECULE_PRESETS = {
         fade=0.45,
         protocol="Potentiostatic (PS)",
         ps_fade=0.45,
-        gs_fade=1.80,
+        gs_fade=None,
+        comparison_note="Yang reports this PS rate in 1 M H₃PO₄. Its 1.80%/day GS rate is from 1 M H₂SO₄. Switch to the sulfate preset for the matched-formulation comparison.",
         aged_sol=0.55,
     ),
     "O-5 fresh (1 M H2SO4, PS)": dict(
@@ -76,6 +78,7 @@ MOLECULE_PRESETS = {
         protocol="Potentiostatic (PS)",
         ps_fade=0.78,
         gs_fade=1.10,
+        comparison_note="Yang Table 1 used 0.050 M for PS and 0.075 M for GS in 1 M H₂SO₄. The cost shift reflects rates measured at different concentrations.",
         aged_sol=0.06,
     ),
     "O-5 aged polymorph (0.06 M, PS)": dict(
@@ -89,6 +92,8 @@ MOLECULE_PRESETS = {
         protocol="Potentiostatic (PS)",
         ps_fade=0.78,
         gs_fade=1.10,
+        comparison_note="The PS and GS rates were measured at 0.050 M and 0.075 M in 1 M H₂SO₄, respectively. This scenario applies them at the aged polymorph's solubility.",
+        fresh_sol=0.24,
         aged_sol=0.06,
     ),
     "O-1 (1 M H2SO4, PS)": dict(
@@ -102,6 +107,7 @@ MOLECULE_PRESETS = {
         protocol="Potentiostatic (PS)",
         ps_fade=5.70,
         gs_fade=2.90,
+        comparison_note="Yang Table 1 used 0.10 M for PS and 0.05 M for GS in 1 M H₂SO₄. The cost shift reflects rates measured at different concentrations.",
         aged_sol=0.48,
     ),
     "O-3 (1 M H3PO4, PS — stress case)": dict(
@@ -115,6 +121,7 @@ MOLECULE_PRESETS = {
         protocol="Potentiostatic (PS)",
         ps_fade=52.70,
         gs_fade=48.50,
+        comparison_note="Yang Table 1 used 0.10 M O-3 in 1 M H₃PO₄ for both protocols. These rapid rates are used to stress-test the cost model.",
         aged_sol=0.53,
     ),
     "Custom candidate molecule": dict(
@@ -128,6 +135,7 @@ MOLECULE_PRESETS = {
         protocol="Unspecified",
         ps_fade=0.05,
         gs_fade=0.20,
+        comparison_note="Enter rates measured under comparable electrolyte conditions and SOC windows to assess protocol sensitivity.",
         aged_sol=0.50,
     ),
 }
@@ -270,8 +278,8 @@ warnings = []
 if voltage_V > CARBON_OCV_GUIDE:
     warnings.append(
         f"**Exploratory voltage regime ({voltage_V:.2f} V > 1.45 V):** "
-        "Exceeds the approximate 1.45 V open-circuit guide for acidic hydroquinone posolytes "
-        "paired against a carbon hydrogen-evolution bound (−0.60 V vs. SHE at pH 0)."
+        "Exceeds the illustrative 1.45 V open-circuit estimate for asym-O-5 against a "
+        "carbon hydrogen-evolution bound (−0.60 V vs. SHE at pH 0)."
     )
 if fade_pct_day >= 1.0:
     warnings.append(
@@ -420,14 +428,12 @@ with tab1:
 
     st.markdown("---")
     st.subheader("Protocol & Polymorph Stress Test")
-    st.caption(
-        "Quantify how switching cycling protocol (PS vs. GS) or losing solubility through "
-        "polymorph aging shifts system capital cost at identical voltage and stack count."
-    )
+    st.caption("Compare the cost effects of changing the measured fade rate or modeled solubility.")
     sc1, sc2 = st.columns(2)
 
     with sc1:
-        st.markdown("**A. Cycling Protocol Bias (PS vs. GS)**")
+        st.markdown("**A. Cycling Rate Comparison (PS vs. GS)**")
+        st.caption(preset["comparison_note"])
         p1, p2 = st.columns(2)
         ps_fade_in = p1.number_input(
             "PS fade (%/day)",
@@ -436,27 +442,27 @@ with tab1:
             value=float(preset["ps_fade"]),
             step=0.01,
             format="%.4f",
-            key="ps_stress",
+            key=f"ps_stress_{preset_label}",
         )
         gs_fade_in = p2.number_input(
             "GS fade (%/day)",
             min_value=0.0001,
             max_value=100.0,
-            value=float(preset["gs_fade"]),
+            value=preset["gs_fade"],
             step=0.01,
             format="%.4f",
-            key="gs_stress",
+            key=f"gs_stress_{preset_label}",
         )
-        proto_res = protocol_sensitivity_summary(
-            candidate, ps_fade_in, gs_fade_in, mode=mode, voltage=voltage_V, stacks=stacks
-        )
-        m1, m2, m3 = st.columns(3)
-        m1.metric("PS Total", f"${proto_res['ps_usd_kWh']:,.0f}")
-        m2.metric("GS Total", f"${proto_res['gs_usd_kWh']:,.0f}")
-        m3.metric(
-            "GS − PS Shift",
-            f"{proto_res['delta_gs_minus_ps_usd_kWh']:+,.0f} $/kWh",
-        )
+        protocol_delta = None
+        if gs_fade_in is not None:
+            proto_res = protocol_sensitivity_summary(
+                candidate, ps_fade_in, gs_fade_in, mode=mode, voltage=voltage_V, stacks=stacks
+            )
+            protocol_delta = round(proto_res["delta_gs_minus_ps_usd_kWh"], 2)
+            m1, m2, m3 = st.columns(3)
+            m1.metric("PS Total", f"${proto_res['ps_usd_kWh']:,.0f}")
+            m2.metric("GS Total", f"${proto_res['gs_usd_kWh']:,.0f}")
+            m3.metric("GS − PS Shift", f"{protocol_delta:+,.0f} $/kWh")
 
     with sc2:
         st.markdown("**B. Polymorph Solubility Aging (Fixed Fade)**")
@@ -465,10 +471,10 @@ with tab1:
             "Fresh solubility (M)",
             min_value=0.01,
             max_value=6.0,
-            value=float(solubility_M),
+            value=float(preset.get("fresh_sol", solubility_M)),
             step=0.02,
             format="%.3f",
-            key="fresh_sol",
+            key=f"fresh_sol_{preset_label}",
         )
         aged_sol_in = s2.number_input(
             "Aged polymorph solubility (M)",
@@ -477,7 +483,7 @@ with tab1:
             value=float(min(preset["aged_sol"], fresh_sol_in)),
             step=0.01,
             format="%.3f",
-            key="aged_sol",
+            key=f"aged_sol_{preset_label}",
         )
         fresh_side = replace(candidate, active_mol_L=fresh_sol_in)
         poly_res = polymorph_sensitivity_summary(
@@ -516,9 +522,7 @@ with tab1:
                 "max_fade_ferrocyanide_pct_day": round(max_fade_ferro, 6)
                 if np.isfinite(max_fade_ferro)
                 else None,
-                "protocol_delta_gs_minus_ps_usd_kWh": round(
-                    proto_res["delta_gs_minus_ps_usd_kWh"], 2
-                ),
+                "protocol_delta_gs_minus_ps_usd_kWh": protocol_delta,
                 "polymorph_delta_aged_minus_fresh_usd_kWh": round(
                     poly_res["delta_aged_minus_fresh_usd_kWh"], 2
                 ),
@@ -785,9 +789,9 @@ with tab3:
     st.markdown(
         """
 - **Potential Reference Offset (+0.60 V):** Emmel Fig. 2 plots redox potentials roughly `+0.60 V` above conventional RHE values for `1,6-DPAP` and `TEMPTMA`, consistent with referencing potentials to the `-0.60 V` carbon hydrogen-evolution bound at pH 0 (Eq. S42). Both digitized and conventional RHE values are retained in `data/emmel_38_molecules_audit.csv`.
-- **Eq. S40 Maintenance Diagnostic:** Charging single-stack replacement alongside the printed Eq. S38 `t - 1` discount index closely reproduces two published maintenance totals, whereas full-stack replacement at year 10 increases maintenance NPV. Both modes are exposed in this calculator because the original published implementation was not verified directly.
-- **Pricing & Extrapolation Caveats:** Active organic materials are priced on a neutral-molecule mass basis (`$3.48/kg`) paired with an idealized counter-electrolyte (`100 g/mol`, `1 e-`, `2 M`). Fade rates measured in dilute symmetric laboratory cells (`0.05–0.10 M`) are extrapolated to saturation solubility and 20-year operation as a scenario audit, not a direct field lifetime prediction.
-- **Protocol & Polymorph Sensitivity:** For matched-formulation `asym-O-5` (`0.10 M`, `1 M H2SO4`), switching potentiostatic (`0.46%/day`) to galvanostatic (`1.8%/day`) fade increases modeled system cost by `+$33,363/kWh`. For `O-5`, aging-induced polymorph solubility loss (`0.24 M -> 0.06 M`) adds `+$50,333/kWh` at fixed PS fade.
+- **Eq. S40 Maintenance Diagnostic:** Eq. S40 specifies system-wide stack costs. The single-stack sensitivity variant, which also uses the printed Eq. S38 `t - 1` index and Table S8 annual fade for the benchmark rows, closely matches the published total costs for 1,6-DPAP and TEMPTMA. The benchmark comparison leaves open which convention produced the published totals.
+- **Pricing & Extrapolation Caveats:** Active organic materials are priced on a neutral-molecule mass basis (`$3.48/kg`) paired with an idealized counter-electrolyte (`100 g/mol`, `1 e-`, `2 M`). The scenario extrapolates fade from dilute symmetric cells (`0.05–0.10 M`) to saturation and 20-year operation. As printed in Eq. S38, each renewal is billed on the full Eq. 5 cost basis, which includes tank costs.
+- **Protocol & Polymorph Sensitivity:** Applying the `0.46%/day` and `1.80%/day` fade rates measured with matched `asym-O-5` formulations (`0.10 M`, `1 M H2SO4`) at the modeled `0.44 M` yields a `+$33,363/kWh` shift in independent mode. At a fixed PS fade rate, applying the two measured O-5 polymorph solubilities (`0.24 M` and `0.06 M`) yields a `+$50,263/kWh` shift in independent mode and `+$50,333/kWh` in the sensitivity variant.
         """
     )
 
