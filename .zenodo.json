@@ -1,0 +1,37 @@
+{
+  "title": "aorfb-cost-audit: Stability Thresholds, Protocol Sensitivity, and Interactive Cost Calculator for Aqueous Organic Redox Flow Batteries",
+  "description": "Open-source Python library, reproducible audit notebook, and interactive Streamlit calculator evaluating substituent-controlled potential-stability trade-offs, cycling-protocol sensitivity (potentiostatic vs. galvanostatic), and polymorph solubility effects across 42 aqueous organic redox flow battery (AORFB) active materials.",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Wu, Yixi (Ethan)"
+    }
+  ],
+  "keywords": [
+    "aqueous organic redox flow battery",
+    "AORFB",
+    "hydroquinone",
+    "electrochemistry",
+    "techno-economic analysis",
+    "cycling protocol audit",
+    "open-source chemistry"
+  ],
+  "license": "MIT",
+  "related_identifiers": [
+    {
+      "identifier": "10.3390/molecules26133823",
+      "relation": "cites",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.3390/molecules26051203",
+      "relation": "cites",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.1038/s41467-023-42450-9",
+      "relation": "cites",
+      "scheme": "doi"
+    }
+  ]
+}
